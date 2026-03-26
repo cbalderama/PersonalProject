@@ -1,0 +1,13 @@
+{
+  "name": "my-monorepo-root",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "mobile:dev": "npm run start --workspace=apps/mobile",
+    "mobile:lint": "npm run lint --workspace=apps/mobile",
+    "test": "npm test --workspaces"
+  }
+}

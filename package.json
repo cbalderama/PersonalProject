@@ -9,7 +9,7 @@
     "mobile:dev": "npm run start --workspace=apps/mobile",
     "mobile:lint": "npm run lint --workspace=apps/mobile",
     "lint": "eslint apps/mobile",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p ./apps/mobile/tsconfig.json",
     "test": "jest"
   },
   "devDependencies": {

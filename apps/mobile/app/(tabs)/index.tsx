@@ -1,31 +1,45 @@
-import { StyleSheet } from 'react-native';
+import { auth } from '@/services/firebaseConfig';
+import { useRouter } from 'expo-router';
+import { signOut } from 'firebase/auth';
+import React from 'react';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+export default function HomeScreen() {
+  const router = useRouter();
 
-export default function TabOneScreen() {
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      // Optional: Alert.alert("Signed Out", "See you next time!");
+      
+      // Note: You don't technically NEED router.replace here because 
+      // our _layout.tsx "Gatekeeper" will handle the redirect automatically!
+    } catch (error: any) {
+      Alert.alert("Logout Error", error.message);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+      <Text style={{ fontSize: 22, fontWeight: 'bold', marginBottom: 10 }}>
+        Welcome to the App!
+      </Text>
+      
+      <Text style={{ color: '#666', marginBottom: 30 }}>
+        You are currently logged in as: {auth.currentUser?.email}
+      </Text>
+
+      <TouchableOpacity 
+        onPress={handleLogout}
+        style={{ 
+          backgroundColor: '#FF3B30', // Red for logout
+          paddingVertical: 12, 
+          paddingHorizontal: 30, 
+          borderRadius: 8 
+        }}
+      >
+        <Text style={{ color: '#fff', fontWeight: 'bold' }}>Log Out</Text>
+      </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});

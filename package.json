@@ -8,12 +8,13 @@
   "scripts": {
     "mobile:dev": "npm run start --workspace=apps/mobile",
     "mobile:lint": "npm run lint --workspace=apps/mobile",
-    "lint": "eslint .",
+    "lint": "eslint apps/mobile",
     "typecheck": "tsc --noEmit",
     "test": "jest"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
     "ts-jest": "^29.4.6"

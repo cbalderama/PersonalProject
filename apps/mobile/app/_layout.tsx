@@ -18,6 +18,7 @@ export default function RootLayout() {
     });
 
     return unsubscribe;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function RootLayout() {
       // 2. If logged in and TRYING to see Login, send them to the Home tabs
       router.replace('/(tabs)');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, initializing, segments]);
 
   if (initializing) {

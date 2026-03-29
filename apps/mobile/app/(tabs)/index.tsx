@@ -1,11 +1,9 @@
 import { auth } from '@/services/firebaseConfig';
-import { useRouter } from 'expo-router';
 import { signOut } from 'firebase/auth';
 import React from 'react';
 import { Alert, Text, TouchableOpacity, View } from 'react-native';
 
 export default function HomeScreen() {
-  const router = useRouter();
 
   const handleLogout = async () => {
     try {

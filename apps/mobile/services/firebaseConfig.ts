@@ -8,20 +8,20 @@ import {
 import { Platform } from 'react-native';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyActmlgNh2wy6gW5oSniVIa6spR40kaxwA",
-  authDomain: "personalproject-a8b06.firebaseapp.com",
-  projectId: "personalproject-a8b06",
-  storageBucket: "personalproject-a8b06.firebasestorage.app",
-  messagingSenderId: "929031390674",
-  appId: "1:929031390674:web:ed4e743108fadefa39f40b",
-  measurementId: "G-MNM2D77J8W"
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
 
 const persistence: Persistence | Persistence[] = Platform.OS === 'web'
   ? [indexedDBLocalPersistence, browserLocalPersistence]
-  : indexedDBLocalPersistence; // fallback for non-web until we fix persistence
+  : indexedDBLocalPersistence;
 
 export const auth = initializeAuth(app, {
   persistence

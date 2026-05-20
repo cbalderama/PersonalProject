@@ -34,6 +34,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9077ab50-7d0a-4677-b340-407e465d1e78"
+      }
+    },
+    "owner": "rickalder"
   }
 }

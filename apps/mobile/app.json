@@ -13,9 +13,14 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+  "supportsTablet": true,
+  "bundleIdentifier": "com.rickalder.mobile",
+  "infoPlist": {
+    "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "package": "com.rickalder.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -34,6 +39,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9077ab50-7d0a-4677-b340-407e465d1e78"
+      }
+    },
+    "owner": "rickalder"
   }
 }

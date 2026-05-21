@@ -18,6 +18,9 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/apps/mobile/$1',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  collectCoverage: true,
+  coverageDirectory: '<rootDir>/coverage',
+  coverageReporters: ['lcov', 'text'],
   collectCoverageFrom: [
     'apps/mobile/app/**/*.{ts,tsx}',
     'apps/mobile/components/**/*.{ts,tsx}',

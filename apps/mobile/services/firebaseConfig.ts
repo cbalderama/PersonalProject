@@ -5,6 +5,7 @@ import {
   initializeAuth,
   Persistence
 } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 import { Platform } from 'react-native';
 
 const firebaseConfig = {
@@ -26,5 +27,8 @@ const persistence: Persistence | Persistence[] = Platform.OS === 'web'
 export const auth = initializeAuth(app, {
   persistence
 });
+
+// Add Firestore
+export const db = getFirestore(app);
 
 export default app;

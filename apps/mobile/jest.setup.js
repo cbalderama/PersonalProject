@@ -1,4 +1,4 @@
-/* eslint-env jest */
+/* global jest */
 
 // Mock Firebase
 jest.mock('./services/firebaseConfig', () => ({

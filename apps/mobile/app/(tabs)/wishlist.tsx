@@ -1,102 +1,173 @@
-import { toggleWishlist, isInWishlist, addToWishlist, removeFromWishlist } from '../wishlist';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { ProductCard } from '../../components/ProductCard';
+import { addToCart } from '../../services/cart';
+import { auth } from '../../services/firebaseConfig';
+import { getWishlistItems, removeFromWishlist } from '../../services/wishlist';
+import { WishlistItem } from '../../types';
 
-// Mock the entire wishlist module at the function level
-jest.mock('firebase/firestore', () => ({
-  doc: jest.fn(() => ({})),
-  getDoc: jest.fn(),
-  setDoc: jest.fn(),
-  deleteDoc: jest.fn(),
-  serverTimestamp: jest.fn(() => new Date()),
-}));
+export default function WishlistScreen() {
+  const router = useRouter();
+  const user = auth.currentUser;
 
-jest.mock('../firebaseConfig', () => ({
-  db: {},
-}));
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-import { getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+  const loadWishlist = useCallback(async () => {
+    if (!user) return;
+    try {
+      setLoading(true);
+      const items = await getWishlistItems(user.uid);
+      setWishlistItems(items);
+    } catch (error) {
+      console.error('Error loading wishlist:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
-const mockGetDoc = getDoc as jest.MockedFunction<typeof getDoc>;
-const mockSetDoc = setDoc as jest.MockedFunction<typeof setDoc>;
-const mockDeleteDoc = deleteDoc as jest.MockedFunction<typeof deleteDoc>;
+  useEffect(() => {
+    if (user) {
+      loadWishlist();
+    }
+  }, [user, loadWishlist]);
 
-describe('Wishlist Service', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadWishlist();
+    setRefreshing(false);
+  };
 
-  describe('isInWishlist', () => {
-    it('should return true when product is in wishlist', async () => {
-      mockGetDoc.mockResolvedValue({
-        exists: () => true,
-      } as any);
+  const handleRemove = async (productId: string) => {
+    if (!user) return;
+    try {
+      await removeFromWishlist(user.uid, productId);
+      await loadWishlist();
+    } catch (error) {
+      console.error('Error removing from wishlist:', error);
+    }
+  };
 
-      const result = await isInWishlist('user123', 'product456');
+  const handleAddToCart = async (productId: string) => {
+    if (!user) return;
+    try {
+      await addToCart(user.uid, productId, 1);
+      Alert.alert('Success', 'Added to cart!');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
+  };
 
-      expect(result).toBe(true);
-    });
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#2196f3" />
+      </View>
+    );
+  }
 
-    it('should return false when product is not in wishlist', async () => {
-      mockGetDoc.mockResolvedValue({
-        exists: () => false,
-      } as any);
+  if (wishlistItems.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Ionicons name="heart-outline" size={100} color="#ccc" />
+        <Text style={styles.emptyTitle}>Your wishlist is empty</Text>
+        <Text style={styles.emptySubtitle}>Save your favorite products here!</Text>
+        <TouchableOpacity 
+          style={styles.shopButton}
+          onPress={() => router.push('/(tabs)')}
+        >
+          <Text style={styles.shopButtonText}>Browse Products</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
-      const result = await isInWishlist('user123', 'product456');
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={wishlistItems}
+        keyExtractor={item => item.id}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.listContent}
+        refreshing={refreshing}
+        onRefresh={handleRefresh}
+        renderItem={({ item }) => (
+          <View style={styles.productContainer}>
+            <ProductCard
+              product={item.product}
+              onPress={() => console.log('Product detail coming soon!')}
+              onAddToCart={() => handleAddToCart(item.productId)}
+              onToggleWishlist={() => handleRemove(item.productId)}
+              isInWishlist={true}
+            />
+          </View>
+        )}
+      />
+    </View>
+  );
+}
 
-      expect(result).toBe(false);
-    });
-
-    it('should return false on error', async () => {
-      mockGetDoc.mockRejectedValue(new Error('Firebase error'));
-
-      const result = await isInWishlist('user123', 'product456');
-
-      expect(result).toBe(false);
-    });
-  });
-
-  describe('addToWishlist', () => {
-    it('should add product to wishlist', async () => {
-      mockSetDoc.mockResolvedValue(undefined);
-
-      await addToWishlist('user123', 'product456');
-
-      expect(mockSetDoc).toHaveBeenCalled();
-    });
-  });
-
-  describe('removeFromWishlist', () => {
-    it('should remove product from wishlist', async () => {
-      mockDeleteDoc.mockResolvedValue(undefined);
-
-      await removeFromWishlist('user123', 'product456');
-
-      expect(mockDeleteDoc).toHaveBeenCalled();
-    });
-  });
-
-  describe('toggleWishlist', () => {
-    it('should add product when not in wishlist', async () => {
-      mockGetDoc.mockResolvedValue({
-        exists: () => false,
-      } as any);
-      mockSetDoc.mockResolvedValue(undefined);
-
-      const result = await toggleWishlist('user123', 'product456');
-
-      expect(result).toBe(true);
-      expect(mockSetDoc).toHaveBeenCalled();
-    });
-
-    it('should remove product when in wishlist', async () => {
-      mockGetDoc.mockResolvedValue({
-        exists: () => true,
-      } as any);
-      mockDeleteDoc.mockResolvedValue(undefined);
-
-      const result = await toggleWishlist('user123', 'product456');
-
-      expect(result).toBe(false);
-      expect(mockDeleteDoc).toHaveBeenCalled();
-    });
-  });
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  emptyTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#333',
+    marginTop: 16,
+  },
+  emptySubtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  shopButton: {
+    backgroundColor: '#2196f3',
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginTop: 24,
+  },
+  shopButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  listContent: {
+    padding: 8,
+  },
+  row: {
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+  },
+  productContainer: {
+    width: '48%',
+    marginBottom: 8,
+  },
 });

@@ -1,5 +1,4 @@
 import { getProducts, getProductById } from '../products';
-import { db } from '../firebaseConfig';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 
 // Mock Firestore

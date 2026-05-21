@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -24,13 +24,7 @@ export default function WishlistScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      loadWishlist();
-    }
-  }, [user]);
-
-  const loadWishlist = async () => {
+  const loadWishlist = useCallback(async () => {
     if (!user) return;
     try {
       setLoading(true);
@@ -41,7 +35,13 @@ export default function WishlistScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadWishlist();
+    }
+  }, [user, loadWishlist]);
 
   const handleRefresh = async () => {
     setRefreshing(true);

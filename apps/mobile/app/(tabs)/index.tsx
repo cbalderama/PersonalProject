@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -37,17 +37,7 @@ export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    loadProducts();
-  }, [selectedCategory]);
-
-  useEffect(() => {
-    if (user) {
-      loadWishlistIds();
-    }
-  }, [user]);
-
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     try {
       setLoading(true);
       const filters: ProductFilters = {
@@ -60,9 +50,9 @@ export default function HomeScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedCategory]);
 
-  const loadWishlistIds = async () => {
+  const loadWishlistIds = useCallback(async () => {
     if (!user) return;
     try {
       const wishlistItems = await getWishlistItems(user.uid);
@@ -70,7 +60,17 @@ export default function HomeScreen() {
     } catch (error) {
       console.error('Error loading wishlist:', error);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
+
+  useEffect(() => {
+    if (user) {
+      loadWishlistIds();
+    }
+  }, [user, loadWishlistIds]);
 
   const handleRefresh = async () => {
     setRefreshing(true);

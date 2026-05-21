@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -24,13 +24,7 @@ export default function ProfileScreen() {
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      loadStats();
-    }
-  }, [user]);
-
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     if (!user) return;
     try {
       setLoading(true);
@@ -41,7 +35,13 @@ export default function ProfileScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadStats();
+    }
+  }, [user, loadStats]);
 
   const handleLogout = () => {
     Alert.alert(
@@ -67,8 +67,8 @@ export default function ProfileScreen() {
   };
 
   const handleViewOrders = () => {
-  router.push('/orders');  // ← Change this line
-};
+    router.push('/orders');
+  };
 
   if (loading) {
     return (

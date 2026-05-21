@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -27,14 +27,7 @@ export default function ProductDetailScreen() {
   const [quantity, setQuantity] = useState(1);
   const [inWishlist, setInWishlist] = useState(false);
 
-  useEffect(() => {
-    if (id) {
-      loadProduct();
-      checkWishlist();
-    }
-  }, [id]);
-
-  const loadProduct = async () => {
+  const loadProduct = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getProductById(id);
@@ -44,9 +37,9 @@ export default function ProductDetailScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
-  const checkWishlist = async () => {
+  const checkWishlist = useCallback(async () => {
     if (!user) return;
     try {
       const inList = await isInWishlist(user.uid, id);
@@ -54,7 +47,14 @@ export default function ProductDetailScreen() {
     } catch (error) {
       console.error('Error checking wishlist:', error);
     }
-  };
+  }, [user, id]);
+
+  useEffect(() => {
+    if (id) {
+      loadProduct();
+      checkWishlist();
+    }
+  }, [id, loadProduct, checkWishlist]);
 
   const handleAddToCart = async () => {
     if (!user || !product) return;

@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -36,13 +36,7 @@ export default function CheckoutScreen() {
 
   const [paymentMethod, setPaymentMethod] = useState('credit_card');
 
-  useEffect(() => {
-    if (user) {
-      loadCart();
-    }
-  }, [user]);
-
-  const loadCart = async () => {
+  const loadCart = useCallback(async () => {
     if (!user) return;
     try {
       setLoading(true);
@@ -53,7 +47,13 @@ export default function CheckoutScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadCart();
+    }
+  }, [user, loadCart]);
 
   const validateForm = (): boolean => {
     if (!shippingAddress.fullName.trim()) {

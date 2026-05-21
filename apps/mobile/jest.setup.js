@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 // Mock Firebase
 jest.mock('./services/firebaseConfig', () => ({
   auth: {},

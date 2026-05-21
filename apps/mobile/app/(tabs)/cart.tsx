@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
@@ -23,13 +23,7 @@ export default function CartScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      loadCart();
-    }
-  }, [user]);
-
-  const loadCart = async () => {
+  const loadCart = useCallback(async () => {
     if (!user) return;
     try {
       setLoading(true);
@@ -40,7 +34,13 @@ export default function CartScreen() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadCart();
+    }
+  }, [user, loadCart]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -83,9 +83,9 @@ export default function CartScreen() {
   };
 
   const handleCheckout = () => {
-  if (cartItems.length === 0) return;
-  router.push('/checkout');  // ← Change this line
-};
+    if (cartItems.length === 0) return;
+    router.push('/checkout');
+  };
 
   const total = calculateCartTotal(cartItems);
 

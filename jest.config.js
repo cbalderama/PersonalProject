@@ -22,11 +22,10 @@ module.exports = {
   coverageDirectory: '<rootDir>/coverage',
   coverageReporters: ['lcov', 'text'],
   collectCoverageFrom: [
-    'apps/mobile/app/**/*.{ts,tsx}',
-    'apps/mobile/components/**/*.{ts,tsx}',
-    'apps/mobile/services/**/*.{ts,tsx}',
+    'apps/mobile/services/**/*.{ts,tsx}',  // Only measure services
     '!**/__tests__/**',
     '!**/*.test.{ts,tsx}',
     '!**/node_modules/**',
+    '!**/firebaseConfig.ts',  // Exclude config file
   ],
 };

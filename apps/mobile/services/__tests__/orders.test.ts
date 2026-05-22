@@ -130,4 +130,45 @@ describe('Orders Service', () => {
       expect(stats.pendingOrders).toBe(0);
     });
   });
+
+  describe('error handling', () => {
+    it('should throw error when createOrder fails', async () => {
+      mockCollection.mockReturnValue({} as any);
+      mockDoc.mockReturnValue({} as any);
+      mockSetDoc.mockRejectedValue(new Error('Order creation failed'));
+
+      const mockCartItems = [{
+        id: 'cart1',
+        productId: 'p1',
+        product: {
+          id: 'p1',
+          name: 'iPhone',
+          price: 999,
+          stock: 10,
+          category: 'phones' as const,
+          image: '',
+          brand: 'Apple',
+          rating: 5,
+          reviews: 100,
+          description: '',
+        },
+        quantity: 1,
+        addedAt: new Date(),
+      }];
+
+      const mockAddress = {
+        fullName: 'John Doe',
+        street: '123 Main St',
+        city: 'New York',
+        state: 'NY',
+        zipCode: '10001',
+        country: 'USA',
+        phone: '1234567890',
+      };
+
+      await expect(
+        createOrder('user123', mockCartItems, mockAddress, 'credit_card')
+      ).rejects.toThrow('Order creation failed');
+    });
+  });
 });

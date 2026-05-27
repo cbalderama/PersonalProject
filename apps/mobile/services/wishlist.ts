@@ -35,7 +35,7 @@ export const getWishlistItems = async (userId: string): Promise<WishlistItem[]> 
           productId: data.productId,
           product,
           addedAt: data.addedAt?.toDate() || new Date(),
-        } as WishlistItem;
+        }
       })
     );
 

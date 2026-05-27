@@ -38,7 +38,7 @@ export const getCartItems = async (userId: string): Promise<CartItem[]> => {
           product,
           quantity: data.quantity,
           addedAt: data.addedAt?.toDate() || new Date(),
-        } as CartItem;
+        }
       })
     );
 

@@ -1,19 +1,34 @@
-import { auth } from '@/services/firebaseConfig';
-import { Link } from 'expo-router';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { Link, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Text, TextInput, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { signUp } from '@/services/auth';
 
 export default function SignupScreen() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSignup = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter email and password');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters');
+      return;
+    }
+
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      Alert.alert("Success", "Account created!");
+      setLoading(true);
+      await signUp(email, password);
+      Alert.alert('Success', 'Account created!');
+      // Navigation handled by auth state listener in _layout
     } catch (error: any) {
-      Alert.alert("Signup Error", error.message);
+      Alert.alert('Signup Error', error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -28,6 +43,7 @@ export default function SignupScreen() {
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
+        editable={!loading}
         style={{ borderWidth: 1, borderColor: '#ddd', padding: 15, borderRadius: 10, marginBottom: 15 }}
       />
 
@@ -36,14 +52,25 @@ export default function SignupScreen() {
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        editable={!loading}
         style={{ borderWidth: 1, borderColor: '#ddd', padding: 15, borderRadius: 10, marginBottom: 15 }}
       />
 
       <TouchableOpacity 
         onPress={handleSignup}
-        style={{ backgroundColor: '#28a745', padding: 15, borderRadius: 10, alignItems: 'center' }}
+        disabled={loading}
+        style={{ 
+          backgroundColor: loading ? '#cccccc' : '#28a745', 
+          padding: 15, 
+          borderRadius: 10, 
+          alignItems: 'center' 
+        }}
       >
-        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Sign Up</Text>
+        {loading ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Sign Up</Text>
+        )}
       </TouchableOpacity>
 
       <View style={{ marginTop: 20, alignItems: 'center' }}>

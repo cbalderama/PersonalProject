@@ -2,20 +2,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { auth } from '../../services/firebaseConfig';
-import { getOrderStats } from '../../services/orders';
+import { auth } from '@/services/firebaseConfig';
+import { signOutUser } from '@/services/auth';
+import { getOrderStats } from '@/services/orders';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const user = auth.currentUser;
+  const [signingOut, setSigningOut] = useState(false);
 
   const [stats, setStats] = useState({
     totalOrders: 0,
@@ -43,28 +45,30 @@ export default function ProfileScreen() {
     }
   }, [user, loadStats]);
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await auth.signOut();
-              // Navigation handled by auth state listener in _layout
-            } catch (error) {
-              console.error('Error logging out:', error);
-              Alert.alert('Error', 'Failed to logout');
-            }
-          },
-        },
-      ]
-    );
-  };
+const handleLogout = () => {
+  console.log('========== LOGOUT BUTTON CLICKED ==========');
+  
+  // Use window.confirm for web instead of Alert.alert
+  const confirmed = window.confirm('Are you sure you want to logout?');
+  
+  if (confirmed) {
+    console.log('========== LOGOUT CONFIRMED ==========');
+    (async () => {
+      try {
+        setSigningOut(true);
+        console.log('About to call signOutUser()');
+        await signOutUser();
+        console.log('========== SIGN OUT SUCCESS ==========');
+        // Navigation handled by auth state listener in _layout
+      } catch (error) {
+        console.error('========== SIGN OUT ERROR ==========', error);
+        alert('Error: Failed to logout');
+      } finally {
+        setSigningOut(false);
+      }
+    })();
+  }
+};
 
   const handleViewOrders = () => {
     router.push('/orders');
@@ -120,7 +124,7 @@ export default function ProfileScreen() {
           <Ionicons name="chevron-forward" size={24} color="#ccc" />
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.menuItem}
           onPress={() => Alert.alert('Edit Profile', 'Edit profile coming soon!')}
         >
@@ -131,7 +135,7 @@ export default function ProfileScreen() {
           <Ionicons name="chevron-forward" size={24} color="#ccc" />
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.menuItem}
           onPress={() => Alert.alert('Settings', 'Settings coming soon!')}
         >
@@ -142,7 +146,7 @@ export default function ProfileScreen() {
           <Ionicons name="chevron-forward" size={24} color="#ccc" />
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.menuItem}
           onPress={() => Alert.alert('Help', 'Help & Support coming soon!')}
         >
@@ -153,12 +157,22 @@ export default function ProfileScreen() {
           <Ionicons name="chevron-forward" size={24} color="#ccc" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.menuItem, styles.logoutItem]} onPress={handleLogout}>
+        <TouchableOpacity
+          style={[styles.menuItem, styles.logoutItem]}
+          onPress={handleLogout}
+          disabled={signingOut}
+        >
           <View style={styles.menuItemLeft}>
             <Ionicons name="log-out-outline" size={24} color="#f44336" />
-            <Text style={[styles.menuItemText, styles.logoutText]}>Logout</Text>
+            <Text style={[styles.menuItemText, styles.logoutText]}>
+              {signingOut ? 'Signing out...' : 'Logout'}
+            </Text>
           </View>
-          <Ionicons name="chevron-forward" size={24} color="#ccc" />
+          {signingOut ? (
+            <ActivityIndicator size="small" color="#f44336" />
+          ) : (
+            <Ionicons name="chevron-forward" size={24} color="#ccc" />
+          )}
         </TouchableOpacity>
       </View>
 
